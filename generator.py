@@ -22,51 +22,33 @@ import random
 from model import Generator,Discriminator
 from Dataloader import get_dataloader
 from utils import matplotlib_imshow
-if __name__=="__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset',required=False,help='name')
-    opt = parser.parse_args()
-    
-    seed = 1234
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-    
-    image_size = 64
-    batch_size = 128
-    n_epochs = 45
-    main_path = "../home/mvenkataraman_ph/Face-Super-Resolution-Through-Wasserstein-GANs/"
-    
-
-    train_loader , validation_loader = get_dataloader(main_path + "root",image_size,batch_size,seed)
-    log_dir = main_path + "runs/logs2"
 
 
-    class WGAN_GP():
-        def __init__(self,generator , discriminator , Dataloader , Dataloader_val, critic_iters =5 , gamma = 10, use_cuda = True , logdir = "None" ):
-          self.G_Net = generator
-          self.D_Net = discriminator
-          self.G_optim = optim.Adam(self.G_Net.parameters(), lr=5e-4, betas=(0.5, 0.9))
-          self.D_optim = optim.Adam(self.D_Net.parameters(), lr=5e-4, betas=(0.5, 0.9))
-          self.Dataloader = Dataloader
-          self.d_scheduler = StepLR(self.D_optim, step_size=1, gamma=0.99)
-          self.g_scheduler = StepLR(self.G_optim, step_size=1, gamma=0.99)
-          self.Dataloader_val = Dataloader_val
-          self.fixed_validation_noise = torch.rand(64,3,16,16)
 
-          self.critic_iters = critic_iters
-          self.gamma = gamma
-          self.use_cuda = use_cuda
-          self.device = 'cpu'
+class WGAN_GP():
+    def __init__(self,generator , discriminator , Dataloader , Dataloader_val, critic_iters =5 ,lr = 5e-4, gamma = 10, use_cuda = True , logdir = "None" ):
+        self.G_Net = generator
+        self.D_Net = discriminator
+        self.G_optim = optim.Adam(self.G_Net.parameters(), lr=lr, betas=(0.5, 0.9))
+        self.D_optim = optim.Adam(self.D_Net.parameters(), lr=lr, betas=(0.5, 0.9))
+        self.Dataloader = Dataloader
+        self.d_scheduler = StepLR(self.D_optim, step_size=1, gamma=0.99)
+        self.g_scheduler = StepLR(self.G_optim, step_size=1, gamma=0.99)
+        self.Dataloader_val = Dataloader_val
+        self.fixed_validation_noise = torch.rand(64,3,16,16)
 
-          self.fixed_vector_1 = torch.rand(36,3,16,16)
+        self.critic_iters = critic_iters
+        self.gamma = gamma
+        self.use_cuda = use_cuda
+        self.device = 'cpu'
 
-          self.writer = SummaryWriter(logdir)
-          self.total_epochs = 0
-          self.steps = 0
+        self.fixed_vector_1 = torch.rand(36,3,16,16)
 
-          if self.use_cuda:
+        self.writer = SummaryWriter(logdir)
+        self.total_epochs = 0
+        self.steps = 0
+
+        if self.use_cuda:
             self.G_Net.cuda()
             self.D_Net.cuda()
 
@@ -74,7 +56,7 @@ if __name__=="__main__":
             self.fixed_validation_noise = self.fixed_validation_noise.cuda()
             self.device = 'cuda'
 
-        def train(self, n_epochs):
+      def train(self, n_epochs , main_path):
           for epoch in range(1,n_epochs + 1):
             print('Starting epoch {}...'.format(epoch) )
             print('Time - ',datetime.now())
@@ -86,7 +68,7 @@ if __name__=="__main__":
               torch.save(self.G_Net.state_dict(), main_path+ 'results/' + 'WGAN'+'_generator_{}.pt'.format(self.total_epochs))
               torch.save(self.D_Net.state_dict(), main_path+ 'results/' +'WGAN'+'_discriminator_{}.pt'.format(self.total_epochs))
 
-        def train_epoch(self,epoch,n_epochs):
+      def train_epoch(self,epoch,n_epochs):
           for i, (data,_) in enumerate(self.Dataloader):
 
             for p in self.D_Net.parameters():
@@ -124,7 +106,7 @@ if __name__=="__main__":
               self.validate(epoch)
               self.steps+=1
               
-        def validate(self,epoch):
+      def validate(self,epoch,n_epochs):
           with torch.no_grad():
             
             discrimnator_value = 0.0
@@ -152,7 +134,7 @@ if __name__=="__main__":
             self.writer.add_scalar('Wassertian Distance Validation ', W_D_overall, self.steps)
 
               
-        def gradient_penalty(self, data, generated_data, gamma=10):
+      def gradient_penalty(self, data, generated_data, gamma=10):
           batch_size = data.size(0)
           epsilon = torch.rand(batch_size, 1, 1, 1)
           epsilon = epsilon.expand_as(data)
@@ -177,16 +159,13 @@ if __name__=="__main__":
           gradients_norm = torch.sqrt(torch.sum(gradients ** 2, dim=1) + 1e-12)
           return self.gamma * ((gradients_norm - 1) ** 2).mean()
 
-        def _sample_(self,n_samples):
+      def _sample_(self,n_samples):
           z = torch.rand(n_samples,3,16,16)
           if self.use_cuda:
             z = z.cuda()
             return z
 
-    genarator = Generator()
-    discriminator = Discriminator(bn="instance_norm")
-    wgan = WGAN_GP(genarator,discriminator,train_loader , validation_loader , logdir= log_dir)
-    wgan.train(n_epochs)
+    
 
 
 
