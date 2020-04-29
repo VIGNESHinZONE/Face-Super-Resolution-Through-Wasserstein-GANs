@@ -24,8 +24,8 @@ and then run this command on
 
 Resolution images:
 
-<img src="https://github.com/VIGNESHinZONE/Face-Super-Resolution-Through-Wasserstein-GANs/blob/master/runs/individualImage.png" height="500" width="500">
+<img src="https://github.com/VIGNESHinZONE/Face-Super-Resolution-Through-Wasserstein-GANs/blob/master/runs/individualImage.png" height="500" width="900">
 
 Image Generation:
 
-<img src="https://github.com/VIGNESHinZONE/Face-Super-Resolution-Through-Wasserstein-GANs/blob/master/runs/individualImage%20(2).png" height="500" width="500">
+<img src="https://github.com/VIGNESHinZONE/Face-Super-Resolution-Through-Wasserstein-GANs/blob/master/runs/individualImage%20(2).png" height="500" width="900">
